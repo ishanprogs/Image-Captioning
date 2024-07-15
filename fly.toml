@@ -1,0 +1,33 @@
+app = 'imagecaption-ishan'
+primary_region = 'sin'
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  FLASK_ENV = "production"
+
+[processes]
+  app = 'gunicorn --bind 0.0.0.0:8080 app:app'
+
+[[services]]
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+  [[services.http_checks]]  # Correctly defined as an array table
+    path = "/"
+    interval = 10000
+    timeout = 2000
+
+[mounts]
+  source = "app_data"
+  destination = "/app"
